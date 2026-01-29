@@ -3906,7 +3906,7 @@ class SpaceMinerGame {
         
         if (confirmBtn) {
             confirmBtn.addEventListener('click', () => {
-                this.executePrestige(Math.min(prestigePoints, 1), oldTheme);
+                this.executePrestige(prestigePoints, oldTheme);
             });
         }
         
@@ -3970,14 +3970,21 @@ class SpaceMinerGame {
         
         // Сохраняем дерево престижных улучшений
         const oldPrestigeTree = this.prestigeUpgradesTree ? [...this.prestigeUpgradesTree] : [];
-        
-        // ✅ ИСПРАВЛЕНИЕ 2: Правильный расчет новых очков престижа
-        // Новая формула: учитываем уже потраченные очки престижа
-        const baseRequiredCredits = 10000;
-        const totalPrestigeMultiplier = Math.pow(2.5, oldPrestige);
-        const requiredCredits = Math.floor(baseRequiredCredits * totalPrestigeMultiplier);
-        const newPrestige = oldPrestige + prestigePoints;
-        
+
+        // Рассчитываем итоговый уровень престижа
+        const newPrestige = oldPrestige + actualPrestigePoints;
+
+        // Рассчитываем, сколько кредитов было потрачено на престижи
+        let spentCredits = 0;
+        let tempPrestige = oldPrestige;
+        for (let i = 0; i < actualPrestigePoints; i++) {
+            const baseRequiredCredits = 10000;
+            const prestigeMultiplier = Math.pow(2.5, tempPrestige);
+            const requiredCredits = Math.floor(baseRequiredCredits * prestigeMultiplier);
+            spentCredits += requiredCredits;
+            tempPrestige++;
+        }
+
         // Создаем новое состояние игры
         const newState = this.getInitialState();
         
@@ -4046,7 +4053,7 @@ class SpaceMinerGame {
         
         // Показываем уведомление
         this.showNotification(
-            `Престиж выполнен! Получено ${prestigePoints} очков престижа! ` +
+            `Престиж выполнен! Получено ${actualPrestigePoints} очков престижа! ` +
             `Множитель: x${this.state.prestigeMultiplier.toFixed(2)}. ` +
             `Стартовый бонус: ${this.formatNumber(startBonus)} кредитов. ` +
             `Шанс крита: ${(newState.doubleClickChance * 100).toFixed(1)}%`, 
@@ -5702,12 +5709,12 @@ class SpaceMinerGame {
                 // Обработка pinch-to-zoom
                 const touch1 = event.touches[0];
                 const touch2 = event.touches[1];
-                initialDistance = Math.hypot(touch2.clientX - touch1.clientX, touch2.clientY - touch1.clientY);
+                this.initialDistance = Math.hypot(touch2.clientX - touch1.clientX, touch2.clientY - touch1.clientY);
                 event.preventDefault();
             }
         });
         
-        document.addEventListener('touchmove', (event) => {
+        treeContainer.addEventListener('touchmove', (event) => {
             if (!this.state.isDragging || event.touches.length !== 1) {
                 // Обработка pinch-to-zoom
                 if (event.touches.length === 2) {
@@ -5717,8 +5724,8 @@ class SpaceMinerGame {
                     const touch2 = event.touches[1];
                     const currentDistance = Math.hypot(touch2.clientX - touch1.clientX, touch2.clientY - touch1.clientY);
                     
-                    if (typeof initialDistance !== 'undefined' && initialDistance > 0) {
-                        const scale = currentDistance / initialDistance;
+                    if (typeof this.initialDistance !== 'undefined' && this.initialDistance > 0) {
+                        const scale = currentDistance / this.initialDistance;
                         const tree = document.querySelector('.upgrade-tree');
                         
                         if (tree) {
@@ -5748,11 +5755,17 @@ class SpaceMinerGame {
             event.preventDefault();
         });
         
-        document.addEventListener('touchend', () => {
+        treeContainer.addEventListener('touchend', (event) => {
             this.state.isDragging = false;
-            if (treeContainer) {
+            // Проверяем, остались ли еще пальцы на экране
+            if (event.touches.length === 0) {
                 treeContainer.style.cursor = 'grab';
             }
+        });
+        
+        treeContainer.addEventListener('touchcancel', () => {
+            this.state.isDragging = false;
+            treeContainer.style.cursor = 'grab';
         });
         
         // Объявляем переменную для pinch-to-zoom вне обработчиков
@@ -5766,6 +5779,28 @@ class SpaceMinerGame {
     
     switchSection(section) {
         console.log('[switchSection] Переключение на секцию:', section);
+        
+        // Сохраняем текущие параметры дерева перед переключением
+        if (section !== 'upgrades' && document.getElementById('tree-container')) {
+            const tree = document.querySelector('.upgrade-tree');
+            if (tree) {
+                // Обновляем состояние дерева, чтобы сохранить текущие параметры
+                const computedStyle = getComputedStyle(tree);
+                if (computedStyle.transform && computedStyle.transform !== 'none') {
+                    // Сохраняем текущие значения в состоянии
+                    // Извлекаем масштаб из трансформации
+                    const matrix = new DOMMatrixReadOnly(computedStyle.transform);
+                    this.state.treeZoom = matrix.a; // масштаб
+                    
+                    // Извлечение смещений из трансформации
+                    const transformMatch = computedStyle.transform.match(/translate\(([-\d.]+)px, ([-\d.]+)px\)/);
+                    if (transformMatch) {
+                        this.state.treeOffsetX = parseFloat(transformMatch[1]);
+                        this.state.treeOffsetY = parseFloat(transformMatch[2]);
+                    }
+                }
+            }
+        }
         
         document.querySelectorAll('.nav-btn').forEach(button => {
             button.classList.remove('active');
