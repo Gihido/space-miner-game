@@ -3737,25 +3737,40 @@ class SpaceMinerGame {
     
     prestige() {
         if (!this.currentUser) return;
+
+        // Рассчитываем возможное количество престижей, которое может позволить себе игрок
+        let totalPrestigeGains = 0;
+        let remainingCredits = this.state.credits;
+        let currentPrestige = this.state.prestige;
         
-        const baseRequiredCredits = 10000;
-        const prestigeMultiplier = Math.pow(2.5, this.state.prestige);
-        const requiredCredits = Math.floor(baseRequiredCredits * prestigeMultiplier);
-        
-        if (this.state.credits < requiredCredits) {
+        while (true) {
+            const baseRequiredCredits = 10000;
+            const prestigeMultiplier = Math.pow(2.5, currentPrestige);
+            const requiredCredits = Math.floor(baseRequiredCredits * prestigeMultiplier);
+            
+            if (remainingCredits >= requiredCredits) {
+                totalPrestigeGains++;
+                remainingCredits -= requiredCredits;
+                currentPrestige++;
+            } else {
+                break;
+            }
+        }
+
+        if (totalPrestigeGains === 0) {
+            const baseRequiredCredits = 10000;
+            const prestigeMultiplier = Math.pow(2.5, this.state.prestige);
+            const requiredCredits = Math.floor(baseRequiredCredits * prestigeMultiplier);
             console.log('[prestige] Недостаточно кредитов для престижа:', this.state.credits, 'нужно:', requiredCredits);
             this.showNotification(`Нужно ${this.formatNumber(requiredCredits)} кредитов для престижа!`, 'warning');
             return;
         }
-        
-        // ✅ ИСПРАВЛЕНИЕ: Максимум 1 очко престижа за один раз
-        const prestigePoints = 1; // Всегда 1 очко
-        
+
         // Сохраняем текущую тему планеты для анимации
         const oldTheme = this.planetThemes[this.currentPlanetTheme];
-        
+
         // Создаем модальное окно подтверждения
-        this.showPrestigeConfirmation(prestigePoints, requiredCredits, oldTheme);
+        this.showPrestigeConfirmation(totalPrestigeGains, oldTheme);
     }
 
     showPrestigeConfirmation(prestigePoints, requiredCredits, oldTheme) {
