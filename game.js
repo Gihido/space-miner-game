@@ -4907,7 +4907,8 @@ class SpaceMinerGame {
             
             html += `
                 <div class="${nodeClass}" style="left: ${x}px; top: ${y}px;"
-                     onclick="${onclickHandler}">
+                     onclick="${onclickHandler}"
+                     ontouchstart="${onclickHandler}">
                     <div class="upgrade-icon-wrapper">
                         <div class="upgrade-icon">
                             <i class="${upgrade.icon}"></i>
