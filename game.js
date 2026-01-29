@@ -2636,8 +2636,13 @@ class SpaceMinerGame {
         }
         
         if (planet) {
-            console.log('[setupEventListeners] Найдена планета, добавление обработчика');
+            console.log('[setupEventListeners] Найдена планета, добавление обработчиков');
             planet.addEventListener('click', () => this.click());
+            // Добавляем поддержку тач-событий для мобильных устройств
+            planet.addEventListener('touchstart', (e) => {
+                e.preventDefault(); // Предотвращаем стандартное поведение
+                this.click();
+            });
             
             // ✅ Создаем контейнер для планеты и левой панели
             const planetContainer = document.querySelector('.planet-container');

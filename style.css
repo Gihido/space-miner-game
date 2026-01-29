@@ -27,6 +27,7 @@ body {
     line-height: 1.6;
     overflow-x: hidden;
     position: relative;
+    touch-action: manipulation; /* Улучшает производительность тач-событий */
 }
 
 .game-container {
@@ -4286,5 +4287,235 @@ body.profile-open {
     
     .planet-container {
         flex-direction: column;
+    }
+}
+/* Улучшенная адаптивность для мобильных устройств */
+@media (max-width: 768px) {
+    .game-container {
+        padding: 10px;
+        max-width: 100%;
+    }
+
+    .nav-panel {
+        flex-direction: column;
+        gap: 8px;
+        padding: 12px;
+    }
+
+    .nav-btn {
+        min-width: auto;
+        padding: 15px;
+        flex-direction: row;
+        gap: 10px;
+        justify-content: flex-start;
+    }
+
+    .nav-btn i {
+        font-size: 1.4em;
+    }
+
+    .nav-btn span {
+        font-size: 1em;
+    }
+
+    .game-header {
+        padding: 15px;
+    }
+
+    .resources-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+
+    .resource-card {
+        flex-direction: row;
+        text-align: left;
+        gap: 15px;
+        padding: 15px;
+    }
+
+    .clicker-container {
+        padding: 20px;
+    }
+
+    .planet {
+        width: 220px;
+        height: 220px;
+        margin: 0 auto 20px;
+    }
+
+    .click-button {
+        min-width: 100%;
+        padding: 15px;
+        font-size: 1.1em;
+    }
+
+    .click-button i {
+        font-size: 1.2em;
+    }
+
+    .click-text {
+        font-size: 1em;
+    }
+
+    .click-info {
+        font-size: 0.9em;
+    }
+
+    .stats-row {
+        gap: 15px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .stat-box {
+        min-width: 150px;
+        padding: 15px;
+        flex: 1 1 calc(50% - 15px);
+    }
+
+    .combo-container {
+        padding: 15px;
+    }
+
+    .combo-label {
+        font-size: 1.1em;
+    }
+
+    .combo-display {
+        font-size: 2.5em;
+    }
+
+    .content-section {
+        padding: 15px;
+    }
+
+    .shop-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .achievements-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .tree-container {
+        height: 500px;
+    }
+}
+
+@media (max-width: 480px) {
+    .game-container {
+        padding: 8px;
+    }
+
+    .nav-btn {
+        padding: 12px;
+    }
+
+    .nav-btn span {
+        font-size: 0.9em;
+    }
+
+    .resource-card {
+        flex-direction: column;
+        text-align: center;
+        gap: 10px;
+        padding: 12px;
+    }
+
+    .resource-icon {
+        width: 45px;
+        height: 45px;
+        font-size: 1.4em;
+        margin: 0 auto;
+    }
+
+    .planet {
+        width: 180px;
+        height: 180px;
+    }
+
+    .click-button {
+        padding: 12px;
+        font-size: 1em;
+    }
+
+    .stat-box {
+        min-width: 100%;
+        padding: 12px;
+        flex: 1 1 100%;
+    }
+
+    .combo-display {
+        font-size: 2em;
+    }
+
+    .shop-item {
+        min-height: 280px;
+        padding: 15px;
+    }
+
+    .shop-item-icon {
+        font-size: 2.8em;
+        height: 70px;
+    }
+
+    .shop-item-name {
+        font-size: 1.1em;
+    }
+
+    .shop-item-description {
+        font-size: 0.9em;
+    }
+
+    .tree-container {
+        height: 400px;
+    }
+
+    .upgrade-node {
+        width: 60px;
+        height: 60px;
+    }
+
+    .upgrade-icon-wrapper {
+        font-size: 0.8em;
+    }
+    
+    .upgrade-icon {
+        font-size: 1.5em;
+    }
+}
+
+/* Дополнительные стили для улучшения мобильности */
+@media (max-width: 768px) {
+    /* Увеличиваем размер тач-целей */
+    .nav-btn, .click-button, .shop-item, .upgrade-node {
+        min-height: 44px; /* Минимальный размер тач-цели по рекомендациям Google */
+        min-width: 44px;
+    }
+    
+    /* Улучшаем отступы для мобильных */
+    button, input, select, textarea {
+        padding: 12px;
+        margin: 8px 0;
+    }
+    
+    /* Улучшаем читаемость текста на мобильных */
+    body {
+        font-size: 16px;
+    }
+    
+    h1, h2, h3 {
+        line-height: 1.3;
+    }
+    
+    /* Улучшаем доступность для тач-устройств */
+    * {
+        -webkit-tap-highlight-color: transparent;
+        tap-highlight-color: transparent;
     }
 }
