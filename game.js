@@ -154,6 +154,7 @@ class SpaceMinerGame {
             // Позиция дерева
             treeOffsetX: 0,
             treeOffsetY: 0,
+            treeZoom: 1,
             isDragging: false,
             lastMouseX: 0,
             lastMouseY: 0,
@@ -1369,11 +1370,23 @@ class SpaceMinerGame {
     }
     
     playPrestigePlanetChangeAnimation(oldTheme, newTheme) {
+        // Проверяем, что темы определены, иначе используем тему по умолчанию
+        let safeOldTheme = oldTheme || this.planetThemes.default;
+        let safeNewTheme = newTheme || this.planetThemes.default;
+        
+        // Проверяем, что темы содержат необходимые свойства
+        if (!safeOldTheme.color1 || !safeOldTheme.color2 || !safeOldTheme.color3) {
+            safeOldTheme = this.planetThemes.default;
+        }
+        if (!safeNewTheme.color1 || !safeNewTheme.color2 || !safeNewTheme.color3) {
+            safeNewTheme = this.planetThemes.default;
+        }
+        
         const animationHTML = `
             <div class="planet-change-animation show">
-                <div class="old-planet" style="background: radial-gradient(circle at 30% 30%, ${oldTheme.color1}, ${oldTheme.color2}, ${oldTheme.color3})"></div>
+                <div class="old-planet" style="background: radial-gradient(circle at 30% 30%, ${safeOldTheme.color1}, ${safeOldTheme.color2}, ${safeOldTheme.color3})"></div>
                 <div class="traveling-star"></div>
-                <div class="new-planet" style="background: radial-gradient(circle at 30% 30%, ${newTheme.color1}, ${newTheme.color2}, ${newTheme.color3})"></div>
+                <div class="new-planet" style="background: radial-gradient(circle at 30% 30%, ${safeNewTheme.color1}, ${safeNewTheme.color2}, ${safeNewTheme.color3})"></div>
             </div>
         `;
         
@@ -3773,7 +3786,7 @@ class SpaceMinerGame {
         this.showPrestigeConfirmation(totalPrestigeGains, oldTheme);
     }
 
-    showPrestigeConfirmation(prestigePoints, requiredCredits, oldTheme) {
+    showPrestigeConfirmation(prestigePoints, oldTheme) {
         console.log('[showPrestigeConfirmation] Показ подтверждения престижа');
         
         // Закрываем другие модалки если есть
@@ -3938,8 +3951,8 @@ class SpaceMinerGame {
         // Закрываем модальное окно
         this.closePrestigeModal();
         
-        // ✅ ИСПРАВЛЕНИЕ: Всегда добавляем 1 очко престижа
-        const actualPrestigePoints = 1;
+        // Используем переданное количество очков престижа
+        const actualPrestigePoints = prestigePoints || 1;
         
         // Сохраняем данные которые НЕ сбрасываем
         const oldPrestige = this.state.prestige || 0;
@@ -4750,7 +4763,7 @@ class SpaceMinerGame {
                     ` : ''}
                 </div>
             </div>
-            <div class="upgrade-tree" style="transform: translate(${this.state.treeOffsetX}px, ${this.state.treeOffsetY}px)">
+            <div class="upgrade-tree" style="transform: translate(${this.state.treeOffsetX}px, ${this.state.treeOffsetY}px) scale(${this.state.treeZoom || 1})">
                 <svg class="upgrade-connections" width="2000" height="2000">
         `;
         
@@ -5659,22 +5672,93 @@ class SpaceMinerGame {
             const zoomFactor = event.deltaY > 0 ? 0.9 : 1.1;
             const tree = document.querySelector('.upgrade-tree');
             if (tree) {
-                const currentTransform = tree.style.transform || 'scale(1)';
-                const currentScale = parseFloat(currentTransform.match(/scale\(([^)]+)\)/)?.[1] || 1);
+                const currentScale = this.state.treeZoom || 1;
                 const newScale = Math.max(0.3, Math.min(3, currentScale * zoomFactor));
-                tree.style.transform = `scale(${newScale})`;
+                this.state.treeZoom = newScale;
+                tree.style.transform = `translate(${this.state.treeOffsetX}px, ${this.state.treeOffsetY}px) scale(${newScale})`;
             }
         });
         
         treeContainer.addEventListener('dblclick', () => {
             const tree = document.querySelector('.upgrade-tree');
             if (tree) {
-                tree.style.transform = 'scale(1)';
+                tree.style.transform = 'translate(0px, 0px) scale(1)';
                 this.state.treeOffsetX = 0;
                 this.state.treeOffsetY = 0;
+                this.state.treeZoom = 1;
                 this.renderUpgrades();
             }
         });
+        
+        // Добавляем поддержку touch событий для мобильных устройств
+        treeContainer.addEventListener('touchstart', (event) => {
+            if (event.touches.length === 1) {
+                this.state.isDragging = true;
+                this.state.lastMouseX = event.touches[0].clientX;
+                this.state.lastMouseY = event.touches[0].clientY;
+                treeContainer.style.cursor = 'grabbing';
+                event.preventDefault();
+            } else if (event.touches.length === 2) {
+                // Обработка pinch-to-zoom
+                const touch1 = event.touches[0];
+                const touch2 = event.touches[1];
+                initialDistance = Math.hypot(touch2.clientX - touch1.clientX, touch2.clientY - touch1.clientY);
+                event.preventDefault();
+            }
+        });
+        
+        document.addEventListener('touchmove', (event) => {
+            if (!this.state.isDragging || event.touches.length !== 1) {
+                // Обработка pinch-to-zoom
+                if (event.touches.length === 2) {
+                    event.preventDefault();
+                    
+                    const touch1 = event.touches[0];
+                    const touch2 = event.touches[1];
+                    const currentDistance = Math.hypot(touch2.clientX - touch1.clientX, touch2.clientY - touch1.clientY);
+                    
+                    if (typeof initialDistance !== 'undefined' && initialDistance > 0) {
+                        const scale = currentDistance / initialDistance;
+                        const tree = document.querySelector('.upgrade-tree');
+                        
+                        if (tree) {
+                            const currentScale = this.state.treeZoom || 1;
+                            
+                            // Используем текущее значение масштаба дерева из состояния игры, если оно есть
+                            const newScale = Math.max(0.3, Math.min(3, currentScale * scale));
+                            this.state.treeZoom = newScale;
+                            tree.style.transform = `translate(${this.state.treeOffsetX}px, ${this.state.treeOffsetY}px) scale(${newScale})`;
+                        }
+                    }
+                }
+                return;
+            }
+            
+            const touch = event.touches[0];
+            const deltaX = touch.clientX - this.state.lastMouseX;
+            const deltaY = touch.clientY - this.state.lastMouseY;
+            
+            this.state.treeOffsetX += deltaX;
+            this.state.treeOffsetY += deltaY;
+            
+            this.state.lastMouseX = touch.clientX;
+            this.state.lastMouseY = touch.clientY;
+            
+            this.renderUpgrades();
+            event.preventDefault();
+        });
+        
+        document.addEventListener('touchend', () => {
+            this.state.isDragging = false;
+            if (treeContainer) {
+                treeContainer.style.cursor = 'grab';
+            }
+        });
+        
+        // Объявляем переменную для pinch-to-zoom вне обработчиков
+        let initialDistance;
+        
+
         
         treeContainer.style.cursor = 'grab';
         console.log('[setupTreeControls] Управление деревом настроено');
