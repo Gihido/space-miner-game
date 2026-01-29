@@ -1068,6 +1068,7 @@ body {
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     transform: translate(-50%, -50%);
+    touch-action: manipulation; /* Улучшает восприятие касаний */
 }
 
 .upgrade-node:hover:not(.locked):not(.maxed) {
@@ -2370,7 +2371,51 @@ body {
     }
     
     .tree-container {
-        height: 500px;
+        height: 400px; /* Уменьшенная высота для мобильных */
+    }
+    
+    .tree-controls {
+        flex-direction: column;
+        gap: 10px;
+        padding: 10px;
+    }
+    
+    .tree-info {
+        text-align: center;
+        font-size: 0.8em;
+    }
+    
+    .tree-stats {
+        flex-direction: column;
+        gap: 8px;
+        align-items: center;
+    }
+    
+    .tree-stat {
+        font-size: 0.85em;
+    }
+    
+    .upgrade-node {
+        width: 60px; /* Уменьшенный размер для мобильных */
+        height: 60px;
+    }
+    
+    .upgrade-node.start-node {
+        width: 80px;
+        height: 80px;
+    }
+    
+    .upgrade-icon {
+        font-size: 1.5em;
+    }
+    
+    .upgrade-node.start-node .upgrade-icon {
+        font-size: 2em;
+    }
+    
+    .upgrade-tooltip {
+        width: 200px; /* Меньший размер тултипа */
+        font-size: 0.8em;
     }
     
     .game-controls {
@@ -2397,14 +2442,63 @@ body {
     .login-header h1 {
         font-size: 1.8em;
     }
-    
-    .tree-stats {
-        flex-direction: column;
-        gap: 10px;
-    }
 }
 
+/* Дополнительные стили для маленьких мобильных устройств */
 @media (max-width: 480px) {
+    .tree-container {
+        height: 350px;
+    }
+    
+    .tree-info {
+        font-size: 0.7em;
+    }
+    
+    .tree-stat {
+        font-size: 0.75em;
+    }
+    
+    .upgrade-node {
+        width: 50px;
+        height: 50px;
+    }
+    
+    .upgrade-node.start-node {
+        width: 70px;
+        height: 70px;
+    }
+    
+    .upgrade-icon {
+        font-size: 1.3em;
+    }
+    
+    .upgrade-node.start-node .upgrade-icon {
+        font-size: 1.7em;
+    }
+    
+    .upgrade-tooltip {
+        width: 180px;
+        font-size: 0.75em;
+        padding: 10px;
+    }
+    
+    .upgrade-name {
+        font-size: 1em;
+    }
+    
+    .upgrade-description {
+        font-size: 0.8em;
+    }
+    
+    .upgrade-price {
+        font-size: 1em;
+    }
+    
+    .tree-stat span {
+        font-size: 0.8em;
+    }
+    
+    /* Добавляем стили, которые были в удаленном блоке */
     .resource-card {
         flex-direction: column;
         text-align: center;
@@ -2450,6 +2544,8 @@ body {
         font-size: 1.3em;
     }
 }
+
+
 
 /* ===== ПАТЧ-НОТСЫ ===== */
 .patch-notes-overlay {
@@ -4517,5 +4613,113 @@ body.profile-open {
     * {
         -webkit-tap-highlight-color: transparent;
         tap-highlight-color: transparent;
+    }
+
+    /* Улучшенные стили для дерева улучшений на мобильных */
+    .upgrade-node {
+        touch-action: manipulation;
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+    }
+
+    .tree-container {
+        -webkit-overflow-scrolling: touch; /* Плавный скролл на iOS */
+        touch-action: pan-x pan-y; /* Разрешаем свайпы на мобильных */
+        height: 500px; /* Увеличиваем высоту для лучшей видимости */
+    }
+
+    .upgrade-tree {
+        transform-origin: 0 0; /* Изменяем точку масштабирования */
+        min-width: 2000px; /* Увеличиваем минимальную ширину для мобильных */
+        min-height: 2000px;
+    }
+
+    .upgrade-node {
+        width: 70px;
+        height: 70px;
+        min-width: 70px;
+        min-height: 70px;
+    }
+
+    .upgrade-icon {
+        font-size: 1.8em;
+    }
+
+    .upgrade-tooltip {
+        width: 220px;
+        font-size: 0.8em;
+    }
+
+    .tree-controls {
+        position: sticky;
+        top: 0;
+        left: 0;
+        z-index: 100;
+    }
+
+    .tree-stat {
+        font-size: 0.8em;
+    }
+}
+
+@media (max-width: 480px) {
+    /* Адаптация дерева улучшений для маленьких экранов */
+    .tree-container {
+        height: 400px;
+        overflow: auto; /* Добавляем скролл для маленьких экранов */
+    }
+
+    .upgrade-tree {
+        min-width: 2500px;
+        min-height: 2500px;
+        transform: scale(0.6); /* Уменьшаем масштаб для мобильных */
+        transform-origin: 0 0;
+    }
+
+    .upgrade-node {
+        width: 60px;
+        height: 60px;
+        min-width: 60px;
+        min-height: 60px;
+    }
+
+    .upgrade-icon-wrapper {
+        font-size: 0.8em;
+    }
+
+    .upgrade-icon {
+        font-size: 1.5em;
+    }
+
+    .upgrade-tooltip {
+        width: 200px;
+        font-size: 0.7em;
+    }
+
+    .tree-stat {
+        font-size: 0.7em;
+    }
+
+    /* Улучшенные тултипы для мобильных */
+    .upgrade-tooltip {
+        position: fixed !important;
+        top: 50% !important;
+        left: 50% !important;
+        transform: translate(-50%, -50%) !important;
+        z-index: 1000 !important;
+        width: 250px !important;
+        max-width: 90vw !important;
+        font-size: 0.9em !important;
+    }
+
+    .upgrade-node:hover .upgrade-tooltip {
+        display: block !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+        top: 50% !important;
+        left: 50% !important;
     }
 }
