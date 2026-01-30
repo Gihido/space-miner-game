@@ -1,1 +1,12 @@
-Nothing should be ignored based on the provided file changes. The changes only include CSS and JavaScript source files (.css, .js) which are core project files that should be tracked in version control. There are no build artifacts, dependency directories, temporary files, or other items that typically warrant being added to .gitignore.
+```gitignore
+# Dependencies
+node_modules/
+
+# Editors
+.vscode/
+
+# Environment
+.env
+.env.local
+*.env.*
+```
