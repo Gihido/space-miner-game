@@ -981,6 +981,11 @@ body {
     position: relative;
     overflow: hidden;
     cursor: grab;
+    touch-action: none; /* Отключаем стандартные жесты для возможности перетаскивания */
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
 }
 
 .tree-container:active {
