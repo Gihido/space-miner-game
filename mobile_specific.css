@@ -112,16 +112,56 @@
     }
 }
 
-/* Улучшения для экранов шириной до 360px */
-@media (max-width: 360px) {
+/* Улучшения для экранов шириной до 400px */
+@media (max-width: 400px) {
+    /* Навигационные кнопки в виде квадратов без текста */
+    .nav-panel {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        grid-auto-rows: 1fr;
+        gap: 5px;
+        padding: 8px;
+    }
+    
     .nav-btn {
-        min-width: calc(50% - 5px);
-        padding: 8px 3px;
-        flex: 1 1 calc(50% - 5px);
+        min-width: auto;
+        padding: 15px 5px;
+        margin: 0;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        aspect-ratio: 1/1; /* Квадратная форма */
+    }
+    
+    .nav-btn span {
+        display: none; /* Скрываем текст */
     }
     
     .nav-btn i {
-        font-size: 1.3em;
+        font-size: 1.6em;
+        margin: 0;
+    }
+    
+    .nav-btn {
+        justify-content: center;
+        text-align: center;
+    }
+}
+
+/* Улучшения для экранов шириной до 360px */
+@media (max-width: 360px) {
+    .nav-panel {
+        grid-template-columns: repeat(2, 1fr); /* 2 в ряд для очень маленьких экранов */
+        gap: 3px;
+        padding: 5px;
+    }
+    
+    .nav-btn {
+        padding: 12px 3px;
+    }
+    
+    .nav-btn i {
+        font-size: 1.4em;
     }
     
     .resource-card {
