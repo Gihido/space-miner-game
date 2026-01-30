@@ -34,7 +34,7 @@ executePrestige(totalPrestigeGains, oldTheme) {
         let tempPrestige = oldPrestige;
         for (let i = 0; i < totalPrestigeGains; i++) {
             const baseRequiredCredits = 10000;
-            const prestigeMultiplier = Math.pow(2.5, tempPrestige);
+            const prestigeMultiplier = Math.pow(1.1, tempPrestige);
             const requiredCredits = Math.floor(baseRequiredCredits * prestigeMultiplier);
             spentCredits += requiredCredits;
             tempPrestige++;
