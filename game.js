@@ -4207,28 +4207,45 @@ class SpaceMinerGame {
         const button = document.getElementById('prestige-button');
         if (!button) return;
     
+        // Calculate how many prestige points the player can earn based on their credits
         const baseRequiredCredits = 25000; // Changed from 10000 to 25000
-        const totalPrestige = this.state.prestige || 0;
-        const prestigeMultiplier = Math.pow(1.1, totalPrestige); // Changed from 2.5 to 1.1
-        const requiredCredits = Math.floor(baseRequiredCredits * prestigeMultiplier);
+        let currentPrestige = this.state.prestige || 0;
+        let possiblePrestigeGains = 0;
+        let tempCredits = this.state.credits;
         
-        // ✅ ИСПРАВЛЕНИЕ: Всегда 1 очко за престиж
+        // Calculate how many times we can prestige with current credits
+        while (tempCredits >= baseRequiredCredits * Math.pow(1.1, currentPrestige + possiblePrestigeGains)) {
+            const nextPrestigeCost = baseRequiredCredits * Math.pow(1.1, currentPrestige + possiblePrestigeGains);
+            if (tempCredits >= nextPrestigeCost) {
+                tempCredits -= nextPrestigeCost;
+                possiblePrestigeGains++;
+            } else {
+                break;
+            }
+        }
+        
+        // At least 1 prestige point if we can afford the next one
+        if (this.state.credits >= baseRequiredCredits * Math.pow(1.1, currentPrestige)) {
+            possiblePrestigeGains = Math.max(1, possiblePrestigeGains);
+        }
+        
+        const requiredCredits = Math.floor(baseRequiredCredits * Math.pow(1.1, currentPrestige));
         const canPrestige = this.state.credits >= requiredCredits;
     
         const requirementElement = document.getElementById('prestige-requirement');
         const gainElement = document.getElementById('prestige-gain');
     
         if (requirementElement) requirementElement.textContent = this.formatNumber(requiredCredits);
-        if (gainElement) gainElement.textContent = canPrestige ? '1' : '0';
+        if (gainElement) gainElement.textContent = possiblePrestigeGains > 0 ? possiblePrestigeGains : '0';
     
         if (canPrestige) {
             button.disabled = false;
             button.innerHTML = `
                 <i class="fas fa-rocket"></i>
-                <span>ВЫПОЛНИТЬ ПРЕСТИЖ (+1)</span>
+                <span>ВЫПОЛНИТЬ ПРЕСТИЖ (+${possiblePrestigeGains})</span>
                 <small>Начать заново с бонусами престижа</small>
             `;
-            button.title = `Нажмите для получения 1 очка престижа`;
+            button.title = `Нажмите для получения ${possiblePrestigeGains} очков престижа`;
         } else {
             button.disabled = true;
             button.innerHTML = `
@@ -4777,12 +4794,12 @@ class SpaceMinerGame {
         
         // Объединяем обычные и престижные улучшения
         let allUpgrades = [...this.upgradesTree];
-        if (this.state.prestige >= 1 && this.prestigeUpgradesTree && this.prestigeUpgradesTree.length > 0) {
+        if (this.prestigeUpgradesTree && this.prestigeUpgradesTree.length > 0) {
             console.log('[renderUpgrades] Добавляем престижные улучшения:', this.prestigeUpgradesTree.length);
             
-            // Показываем все престижные улучшения если есть престиж
+            // Показываем все престижные улучшения всегда, независимо от количества престижных очков
             const visiblePrestigeUpgrades = this.prestigeUpgradesTree.filter(upgrade => 
-                this.state.prestige >= 1 || upgrade.unlocked
+                true  // Always include all prestige upgrades
             );
             console.log('[renderUpgrades] Видимых престижных улучшений:', visiblePrestigeUpgrades.length);
             
@@ -5714,6 +5731,10 @@ class SpaceMinerGame {
             event.preventDefault();
         });
         
+        // Добавляем переменные для оптимизации перетаскивания
+        this.lastDragRender = 0;
+        const DRAG_RENDER_INTERVAL = 16; // ~60fps
+
         document.addEventListener('mousemove', (event) => {
             if (!this.state.isDragging) return;
             
@@ -5726,7 +5747,12 @@ class SpaceMinerGame {
             this.state.lastMouseX = event.clientX;
             this.state.lastMouseY = event.clientY;
             
-            this.renderUpgrades();
+            // Ограничиваем частоту рендеринга во время перетаскивания
+            const now = Date.now();
+            if (now - this.lastDragRender > DRAG_RENDER_INTERVAL) {
+                this.renderUpgrades();
+                this.lastDragRender = now;
+            }
         });
         
         document.addEventListener('mouseup', () => {
@@ -5813,7 +5839,12 @@ class SpaceMinerGame {
             this.state.lastMouseX = touch.clientX;
             this.state.lastMouseY = touch.clientY;
             
-            this.renderUpgrades();
+            // Ограничиваем частоту рендеринга во время перетаскивания
+            const now = Date.now();
+            if (now - this.lastDragRender > DRAG_RENDER_INTERVAL) {
+                this.renderUpgrades();
+                this.lastDragRender = now;
+            }
             event.preventDefault();
         });
         
