@@ -4816,7 +4816,7 @@ class SpaceMinerGame {
         
         let html = `
             <div class="tree-controls">
-                <div class="tree-info">
+                <div class="tree-info desktop-only">
                     <i class="fas fa-info-circle"></i>
                     <span>Перетащите для перемещения, колесико для зума, двойной клик для сброса</span>
                 </div>
@@ -5022,7 +5022,7 @@ class SpaceMinerGame {
             html += `
                 <div class="${nodeClass}" style="left: ${x}px; top: ${y}px;"
                      onclick="${onclickHandler}"
-                     ontouchstart="${onclickHandler}">
+                     ontouchstart="event.preventDefault(); ${onclickHandler}">
                     <div class="upgrade-icon-wrapper">
                         <div class="upgrade-icon">
                             <i class="${upgrade.icon}"></i>
@@ -5837,15 +5837,18 @@ class SpaceMinerGame {
             }
             
             const touch = event.touches[0];
-            const deltaX = touch.clientX - this.state.lastMouseX;
-            const deltaY = touch.clientY - this.state.lastMouseY;
+            let deltaX = touch.clientX - this.state.lastMouseX;
+            let deltaY = touch.clientY - this.state.lastMouseY;
             
+            // Увеличиваем чувствительность для мобильных устройств
+            deltaX *= 1.5;
+            deltaY *= 1.5;
+
             this.state.treeOffsetX += deltaX;
             this.state.treeOffsetY += deltaY;
-            
+
             this.state.lastMouseX = touch.clientX;
             this.state.lastMouseY = touch.clientY;
-            
             // Ограничиваем частоту рендеринга во время перетаскивания
             const now = Date.now();
             if (now - this.lastDragRender > DRAG_RENDER_INTERVAL) {
