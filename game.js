@@ -3819,8 +3819,8 @@ class SpaceMinerGame {
         let currentPrestige = this.state.prestige;
         
         while (true) {
-            const baseRequiredCredits = 10000;
-            const prestigeMultiplier = Math.pow(2.5, currentPrestige);
+            const baseRequiredCredits = 25000;
+            const prestigeMultiplier =  Math.pow(1.1, currentPrestige);
             const requiredCredits = Math.floor(baseRequiredCredits * prestigeMultiplier);
             
             if (remainingCredits >= requiredCredits) {
@@ -3833,8 +3833,8 @@ class SpaceMinerGame {
         }
 
         if (totalPrestigeGains === 0) {
-            const baseRequiredCredits = 10000;
-            const prestigeMultiplier = Math.pow(2.5, this.state.prestige);
+            const baseRequiredCredits = 25000;
+            const prestigeMultiplier =  Math.pow(1.1, this.state.prestige);
             const requiredCredits = Math.floor(baseRequiredCredits * prestigeMultiplier);
             console.log('[prestige] Недостаточно кредитов для престижа:', this.state.credits, 'нужно:', requiredCredits);
             this.showNotification(`Нужно ${this.formatNumber(requiredCredits)} кредитов для престижа!`, 'warning');
@@ -3924,8 +3924,8 @@ class SpaceMinerGame {
                                     <i class="fas fa-star"></i>
                                 </div>
                                 <div class="reward-info">
-                                    <div class="reward-name">${Math.min(prestigePoints, 1)} очков престижа</div>
-                                    <div class="reward-desc">Множитель дохода: x${(1 + ((this.state.prestige + Math.min(prestigePoints, 1)) * 0.1)).toFixed(1)}</div>
+                                    <div class="reward-name">${prestigePoints} очков престижа</div>
+                                    <div class="reward-desc">Множитель дохода: x${(1 + ((this.state.prestige + prestigePoints) * 0.1)).toFixed(1)}</div>
                                 </div>
                             </div>
                         </div>
@@ -5797,7 +5797,14 @@ class SpaceMinerGame {
                 // Обработка pinch-to-zoom
                 const touch1 = event.touches[0];
                 const touch2 = event.touches[1];
+                
                 this.initialDistance = Math.hypot(touch2.clientX - touch1.clientX, touch2.clientY - touch1.clientY);
+                this.initialScale = this.state.treeZoom || 1;
+                
+                // Вычисляем центр жеста для корректного масштабирования
+                this.pinchCenterX = (touch1.clientX + touch2.clientX) / 2;
+                this.pinchCenterY = (touch1.clientY + touch2.clientY) / 2;
+                
                 event.preventDefault();
             }
         });
@@ -5861,8 +5868,11 @@ class SpaceMinerGame {
             treeContainer.style.cursor = 'grab';
         });
         
-        // Объявляем переменную для pinch-to-zoom вне обработчиков
-        let initialDistance;
+        // Объявляем переменные для pinch-to-zoom как свойства объекта
+        this.initialDistance = null;
+        this.initialScale = 1;
+        this.pinchCenterX = 0;
+        this.pinchCenterY = 0;
         
 
         
