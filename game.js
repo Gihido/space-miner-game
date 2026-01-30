@@ -467,7 +467,7 @@ class SpaceMinerGame {
                 description: 'Увеличивает скорость восстановления энергии на +0.2 за очко престижа',
                 icon: 'fas fa-tachometer-alt',
                 basePrice: 1,
-                priceMultiplier: 3.0,
+                priceMultiplier: 1.8, // Changed from 3.0 to 1.8 to make upgrades cheaper
                 effect: { 
                     type: 'energyRegenPerPrestige',
                     value: 0.2 
@@ -488,7 +488,7 @@ class SpaceMinerGame {
                 description: 'Шанс получить двойной доход с клика: +1% за уровень',
                 icon: 'fas fa-clone',
                 basePrice: 2,
-                priceMultiplier: 3.5,
+                priceMultiplier: 2.0, // Changed from 3.5 to 2.0 to make upgrades cheaper
                 effect: { 
                     type: 'doubleClickChance',
                     value: 0.01 
@@ -509,7 +509,7 @@ class SpaceMinerGame {
                 description: 'Сохраняет 5% энергии после престижа (до 100%)',
                 icon: 'fas fa-infinity',
                 basePrice: 3,
-                priceMultiplier: 4.0,
+                priceMultiplier: 2.2, // Changed from 4.0 to 2.2 to make upgrades cheaper
                 effect: { 
                     type: 'energySave',
                     value: 0.05 
@@ -2012,7 +2012,7 @@ class SpaceMinerGame {
     
     showPatchNotes() {
         const patchNotesShown = localStorage.getItem('spaceMinerPatchNotesShown');
-        const currentVersion = '1.3.0';
+        const currentVersion = '1.4.0';
         
         if (patchNotesShown !== currentVersion) {
             setTimeout(() => {
@@ -2051,6 +2051,26 @@ class SpaceMinerGame {
                                 <div class="patch-note-item">
                                     <i class="fas fa-star"></i>
                                     <span><strong>Добавлено:</strong> Новые достижения и улучшенная система наград</span>
+                                </div>
+                                <div class="patch-note-item">
+                                    <i class="fas fa-mobile-alt"></i>
+                                    <span><strong>Улучшено:</strong> Интерфейс для мобильных устройств с 3 уровнями адаптивности (560px, 480px, 360px)</span>
+                                </div>
+                                <div class="patch-note-item">
+                                    <i class="fas fa-toggle-on"></i>
+                                    <span><strong>Добавлено:</strong> Кнопки скрытия интерфейса для удобства на мобильных устройствах</span>
+                                </div>
+                                <div class="patch-note-item">
+                                    <i class="fas fa-calculator"></i>
+                                    <span><strong>Изменено:</strong> Формула престижа (теперь 25000 стартовых кредитов, 1.1x за уровень)</span>
+                                </div>
+                                <div class="patch-note-item">
+                                    <i class="fas fa-tags"></i>
+                                    <span><strong>Изменено:</strong> Престижные улучшения стали дешевле (уменьшены множители цен)</span>
+                                </div>
+                                <div class="patch-note-item">
+                                    <i class="fas fa-arrows-alt-v"></i>
+                                    <span><strong>Улучшено:</strong> Прокрутка в профиле улучшена для просмотра всех опций</span>
                                 </div>
                             </div>
                             <div class="patch-notes-footer">
@@ -2094,7 +2114,7 @@ class SpaceMinerGame {
         }
         const dontShow = document.getElementById('dont-show-again');
         if (dontShow && dontShow.checked) {
-            localStorage.setItem('spaceMinerPatchNotesShown', '1.3.0');
+            localStorage.setItem('spaceMinerPatchNotesShown', '1.4.0');
         }
     }
 
@@ -2825,7 +2845,49 @@ class SpaceMinerGame {
             this.addAdminNavButton();
         }
         
+        // Добавляем функциональность для кнопок скрытия интерфейса
+        this.setupGuiToggleButtons();
+
         console.log('[setupEventListeners] Обработчики событий настроены');
+    }
+    
+    setupGuiToggleButtons() {
+        // Кнопка скрытия/показа интерфейса
+        const toggleGuiBtn = document.querySelector('.toggle-gui-btn');
+        if (toggleGuiBtn) {
+            toggleGuiBtn.addEventListener('click', () => {
+                document.body.classList.toggle('gui-hidden');
+                
+                // Меняем иконку кнопки
+                if (document.body.classList.contains('gui-hidden')) {
+                    toggleGuiBtn.innerHTML = '<i class="fas fa-eye"></i>';
+                    toggleGuiBtn.title = 'Показать интерфейс';
+                } else {
+                    toggleGuiBtn.innerHTML = '<i class="fas fa-eye-slash"></i>';
+                    toggleGuiBtn.title = 'Скрыть интерфейс';
+                }
+            });
+        }
+        
+        // Кнопка скрытия таблицы улучшений
+        const treeHideBtn = document.querySelector('.tree-hide-btn');
+        if (treeHideBtn) {
+            treeHideBtn.addEventListener('click', () => {
+                const treeContainer = document.querySelector('.tree-container');
+                if (treeContainer) {
+                    treeContainer.classList.toggle('hidden-upgrade-table');
+                    
+                    // Меняем иконку кнопки
+                    if (treeContainer.classList.contains('hidden-upgrade-table')) {
+                        treeHideBtn.innerHTML = '<i class="fas fa-table"></i>';
+                        treeHideBtn.title = 'Показать таблицу';
+                    } else {
+                        treeHideBtn.innerHTML = '<i class="fas fa-times"></i>';
+                        treeHideBtn.title = 'Скрыть таблицу';
+                    }
+                }
+            });
+        }
     }
     
     addAdminNavButton() {
@@ -3978,8 +4040,8 @@ class SpaceMinerGame {
         let spentCredits = 0;
         let tempPrestige = oldPrestige;
         for (let i = 0; i < actualPrestigePoints; i++) {
-            const baseRequiredCredits = 10000;
-            const prestigeMultiplier = Math.pow(2.5, tempPrestige);
+            const baseRequiredCredits = 25000; // Changed from 10000 to 25000
+            const prestigeMultiplier = Math.pow(1.1, tempPrestige); // Changed from 2.5 to 1.1
             const requiredCredits = Math.floor(baseRequiredCredits * prestigeMultiplier);
             spentCredits += requiredCredits;
             tempPrestige++;
@@ -4145,9 +4207,9 @@ class SpaceMinerGame {
         const button = document.getElementById('prestige-button');
         if (!button) return;
     
-        const baseRequiredCredits = 10000;
+        const baseRequiredCredits = 25000; // Changed from 10000 to 25000
         const totalPrestige = this.state.prestige || 0;
-        const prestigeMultiplier = Math.pow(2.5, totalPrestige);
+        const prestigeMultiplier = Math.pow(1.1, totalPrestige); // Changed from 2.5 to 1.1
         const requiredCredits = Math.floor(baseRequiredCredits * prestigeMultiplier);
         
         // ✅ ИСПРАВЛЕНИЕ: Всегда 1 очко за престиж
